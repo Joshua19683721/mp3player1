@@ -39,12 +39,25 @@
             font-size: 16px;
             cursor: pointer;
         }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            margin: 5px;
+            cursor: pointer;
+            color: #007bff;
+        }
+        li:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
     <h1>MP3 播放器</h1>
     <div id="playlist">
         <p>當前播放：<span id="current-track">-</span></p>
+        <ul id="track-list"></ul>
         <button onclick="playPrevious()">上一首</button>
         <button onclick="playNext()">下一首</button>
         <button onclick="shufflePlaylist()">隨機播放</button>
@@ -59,8 +72,7 @@
 
     <script>
         const apiKey = 'AIzaSyCx54ouzWP7x3Wltej4y4YBpzENIxAZE5k'; // 替換成你的 Google Sheets API 金鑰
-        const sheetId = '1Z-H_LwqoYAlLOCnuCy74m_EiWu8_FNcrRqgX8QJ1H6o
-'; // 替換成你的 Google Sheet ID
+        const sheetId = '1Z-H_LwqoYAlLOCnuCy74m_EiWu8_FNcrRqgX8QJ1H6o'; // 替換成你的 Google Sheet ID
         const sheetName = 'Sheet1'; // 替換成你的工作表名稱
 
         let playlist = [];
@@ -76,9 +88,25 @@
             const response = await fetch(url);
             const data = await response.json();
             if (data.values) {
-                playlist = data.values.slice(1).map(row => ({ name: row[0], url: row[1] }));
+                playlist = data.values.map(row => ({
+                    name: row[0], // 曲目編號
+                    url: row[1]   // MP3 文件 URL
+                }));
+                renderPlaylist(); // 渲染播放清單
                 playTrack(currentTrackIndex); // 初始化播放第一首
             }
+        }
+
+        // 渲染播放清單
+        function renderPlaylist() {
+            const trackList = document.getElementById("track-list");
+            trackList.innerHTML = ""; // 清空列表
+            playlist.forEach((track, index) => {
+                const li = document.createElement("li");
+                li.textContent = `曲目 ${track.name}`;
+                li.onclick = () => playTrack(index); // 點擊播放
+                trackList.appendChild(li);
+            });
         }
 
         // 載入並播放當前曲目
@@ -86,7 +114,7 @@
             if (index >= 0 && index < playlist.length) {
                 currentTrackIndex = index;
                 audioPlayer.src = playlist[currentTrackIndex].url;
-                currentTrackElement.textContent = playlist[currentTrackIndex].name;
+                currentTrackElement.textContent = `曲目 ${playlist[currentTrackIndex].name}`;
                 audioPlayer.play();
             }
         }
