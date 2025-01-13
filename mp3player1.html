@@ -1,4 +1,4 @@
-<!DOCTYPE html>  
+<!DOCTYPE html>
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
@@ -58,18 +58,28 @@
     <audio id="audio-player"></audio>
 
     <script>
-        // 播放清單（替換成你的 MP3 連結）
-        const playlist = [
-            { name: "曲目 1", url: "https://sf-bot-studio-plugin-resource.coze.com/obj/bot-studio-platform-plugin-sg/sami/tts/a73e2cf8874542a3b0f97894cb3f2d1d.mp3" },
-            { name: "曲目 2", url: "https://sf-bot-studio-plugin-resource.coze.com/obj/bot-studio-platform-plugin-sg/sami/tts/9a1dd911351243eca7c9eee81e5d3432.mp3" },
-            { name: "曲目 3", url: "https://sf-bot-studio-plugin-resource.coze.com/obj/bot-studio-platform-plugin-sg/sami/tts/26b9a18877174617b3ef18cff23b850e.mp3" }
-        ];
+        const apiKey = 'AIzaSyAi_e2P2V-n9KoZEliHuIOlPPrdTtDHG-E'; // 替換成你的 Google Sheets API 金鑰
+        const sheetId = '1Z-H_LwqoYAlLOCnuCy74m_EiWu8_FNcrRqgX8QJ1H6o
+'; // 替換成你的 Google Sheet ID
+        const sheetName = 'Sheet1'; // 替換成你的工作表名稱
 
+        let playlist = [];
         let currentTrackIndex = 0; // 當前播放的曲目索引
         const audioPlayer = document.getElementById("audio-player");
         const currentTrackElement = document.getElementById("current-track");
         const progressBar = document.getElementById("progress-bar");
         const progress = document.getElementById("progress");
+
+        // 從 Google Sheets 抓取播放清單
+        async function fetchPlaylist() {
+            const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${sheetName}?key=${apiKey}`;
+            const response = await fetch(url);
+            const data = await response.json();
+            if (data.values) {
+                playlist = data.values.slice(1).map(row => ({ name: row[0], url: row[1] }));
+                playTrack(currentTrackIndex); // 初始化播放第一首
+            }
+        }
 
         // 載入並播放當前曲目
         function playTrack(index) {
@@ -125,8 +135,8 @@
         // 自動播放下一首（當當前曲目結束時）
         audioPlayer.addEventListener("ended", playNext);
 
-        // 初始化：播放第一首
-        playTrack(currentTrackIndex);
+        // 初始化：抓取播放清單並播放第一首
+        fetchPlaylist();
     </script>
 </body>
 </html>
