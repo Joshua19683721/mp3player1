@@ -1,0 +1,132 @@
+<!DOCTYPE html>  
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MP3 播放器</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+        }
+        #playlist {
+            margin-bottom: 20px;
+        }
+        #audio-player {
+            width: 300px;
+            margin: 0 auto;
+            display: none; /* 隱藏原生播放器 */
+        }
+        #progress-bar {
+            width: 300px;
+            height: 5px;
+            background-color: #ddd;
+            margin: 10px auto;
+            position: relative;
+        }
+        #progress {
+            height: 100%;
+            width: 0;
+            background-color: #007bff;
+        }
+        #controls {
+            margin-top: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>MP3 播放器</h1>
+    <div id="playlist">
+        <p>當前播放：<span id="current-track">-</span></p>
+        <button onclick="playPrevious()">上一首</button>
+        <button onclick="playNext()">下一首</button>
+        <button onclick="shufflePlaylist()">隨機播放</button>
+    </div>
+    <div id="progress-bar" onclick="seek(event)">
+        <div id="progress"></div>
+    </div>
+    <div id="controls">
+        <button onclick="togglePlay()">播放/暫停</button>
+    </div>
+    <audio id="audio-player"></audio>
+
+    <script>
+        // 播放清單（替換成你的 MP3 連結）
+        const playlist = [
+            { name: "曲目 1", url: "https://sf-bot-studio-plugin-resource.coze.com/obj/bot-studio-platform-plugin-sg/sami/tts/a73e2cf8874542a3b0f97894cb3f2d1d.mp3" },
+            { name: "曲目 2", url: "https://sf-bot-studio-plugin-resource.coze.com/obj/bot-studio-platform-plugin-sg/sami/tts/9a1dd911351243eca7c9eee81e5d3432.mp3" },
+            { name: "曲目 3", url: "https://sf-bot-studio-plugin-resource.coze.com/obj/bot-studio-platform-plugin-sg/sami/tts/26b9a18877174617b3ef18cff23b850e.mp3" }
+        ];
+
+        let currentTrackIndex = 0; // 當前播放的曲目索引
+        const audioPlayer = document.getElementById("audio-player");
+        const currentTrackElement = document.getElementById("current-track");
+        const progressBar = document.getElementById("progress-bar");
+        const progress = document.getElementById("progress");
+
+        // 載入並播放當前曲目
+        function playTrack(index) {
+            if (index >= 0 && index < playlist.length) {
+                currentTrackIndex = index;
+                audioPlayer.src = playlist[currentTrackIndex].url;
+                currentTrackElement.textContent = playlist[currentTrackIndex].name;
+                audioPlayer.play();
+            }
+        }
+
+        // 播放下一首
+        function playNext() {
+            const nextIndex = (currentTrackIndex + 1) % playlist.length;
+            playTrack(nextIndex);
+        }
+
+        // 播放上一首
+        function playPrevious() {
+            const previousIndex = (currentTrackIndex - 1 + playlist.length) % playlist.length;
+            playTrack(previousIndex);
+        }
+
+        // 隨機播放
+        function shufflePlaylist() {
+            const randomIndex = Math.floor(Math.random() * playlist.length);
+            playTrack(randomIndex);
+        }
+
+        // 播放/暫停
+        function togglePlay() {
+            if (audioPlayer.paused) {
+                audioPlayer.play();
+            } else {
+                audioPlayer.pause();
+            }
+        }
+
+        // 更新進度條
+        audioPlayer.addEventListener("timeupdate", () => {
+            const progressPercent = (audioPlayer.currentTime / audioPlayer.duration) * 100;
+            progress.style.width = progressPercent + "%";
+        });
+
+        // 點擊進度條跳轉
+        function seek(event) {
+            const clickX = event.offsetX;
+            const progressBarWidth = progressBar.clientWidth;
+            const seekTime = (clickX / progressBarWidth) * audioPlayer.duration;
+            audioPlayer.currentTime = seekTime;
+        }
+
+        // 自動播放下一首（當當前曲目結束時）
+        audioPlayer.addEventListener("ended", playNext);
+
+        // 初始化：播放第一首
+        playTrack(currentTrackIndex);
+    </script>
+</body>
+</html>
