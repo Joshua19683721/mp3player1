@@ -51,6 +51,15 @@
         li:hover {
             text-decoration: underline;
         }
+        textarea {
+            width: 80%;
+            height: 1000px;
+            margin-top: 20px;
+            padding: 10px;
+            font-size: 14px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
     </style>
 </head>
 <body>
@@ -68,6 +77,10 @@
     <div id="controls">
         <button onclick="togglePlay()">播放/暫停</button>
     </div>
+    <!-- 新增 textarea -->
+    <div>
+        <textarea id="track-content" placeholder="曲目相關內文"></textarea>
+    </div>
     <audio id="audio-player"></audio>
 
     <script>
@@ -81,6 +94,7 @@
         const currentTrackElement = document.getElementById("current-track");
         const progressBar = document.getElementById("progress-bar");
         const progress = document.getElementById("progress");
+        const trackContentElement = document.getElementById("track-content"); // 新增
 
         // 從 Google Sheets 抓取播放清單
         async function fetchPlaylist() {
@@ -89,8 +103,9 @@
             const data = await response.json();
             if (data.values) {
                 playlist = data.values.map(row => ({
-                    name: row[0], // 曲目編號
-                    url: row[1]   // MP3 文件 URL
+                    name: row[0], // 曲目名稱
+                    url: row[1],  // MP3 文件 URL
+                    content: row[2] || "無相關內文" // 曲目相關內文
                 }));
                 renderPlaylist(); // 渲染播放清單
                 playTrack(currentTrackIndex); // 初始化播放第一首
@@ -115,6 +130,7 @@
                 currentTrackIndex = index;
                 audioPlayer.src = playlist[currentTrackIndex].url;
                 currentTrackElement.textContent = `曲目 ${playlist[currentTrackIndex].name}`;
+                trackContentElement.value = playlist[currentTrackIndex].content; // 更新 textarea 內容
                 audioPlayer.play();
             }
         }
